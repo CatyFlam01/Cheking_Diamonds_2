@@ -216,3 +216,39 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data files
+data/raw/*.csv
+data/processed/*.pkl
+data/processed/*.csv
+
+# Project models
+models/*.pkl
+models/*.joblib
+models/*.pth
+models/*.h5
+models/*.onnx
+!models/.gitkeep
+
+# Project reports
+reports/figures/*.png
+reports/monitoring/*.json
+reports/monitoring/*.png
+!reports/figures/.gitkeep
+!reports/monitoring/.gitkeep
+
+# Jupyter notebooks
+*.ipynb
+
+# MLflow
+mlruns/
+mlflow_data/
+
+# Docker artifacts
+*.tar
+.docker/
+
+# Local secrets
+*.key
+*.pem
+secrets/

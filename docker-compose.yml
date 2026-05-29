@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: diamonds-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - LOG_LEVEL=info
+    volumes:
+      - ./logs:/app/logs
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - diamonds-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  mlflow:
+    image: python:3.9-slim
+    container_name: diamonds-mlflow
+    ports:
+      - "5000:5000"
+    working_dir: /app
+    command: >
+      bash -c "pip install mlflow &&
+               mlflow server
+               --host 0.0.0.0
+               --port 5000
+               --backend-store-uri sqlite:///mlflow.db
+               --default-artifact-root ./artifacts"
+    volumes:
+      - ./mlflow_data:/app/mlflow_data
+    networks:
+      - diamonds-network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: diamonds-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - diamonds-network
+    restart: unless-stopped
+
+networks:
+  diamonds-network:
+    driver: bridge
+
+volumes:
+  logs:
+  mlflow_data:
